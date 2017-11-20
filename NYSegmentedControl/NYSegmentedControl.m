@@ -168,7 +168,7 @@
             
             segment.titleLabel.font = self.titleFont;
             segment.titleLabel.selectedFont = self.selectedTitleFont;
-
+            
             segment.titleLabel.textColor = self.titleTextColor;
             segment.titleLabel.selectedTextColor = self.selectedTitleTextColor;
         } else {
@@ -242,7 +242,7 @@
 
 - (void)moveSelectedSegmentIndicatorToSegmentAtIndex:(NSUInteger)index animated:(BOOL)animated {
     NYSegment *selectedSegment = self.segments[index];
-
+    
     // If we're moving the indicator back to the originally selected segment, don't change the segment's font style
     if (index != self.selectedSegmentIndex && self.stylesTitleForSelectedSegment) {
         NYSegment *previousSegment = self.segments[self.selectedSegmentIndex];
@@ -318,9 +318,9 @@
     // Check that the indicator doesn't exit the bounds of the control
     CGRect newSegmentIndicatorFrame = self.selectedSegmentIndicator.frame;
     newSegmentIndicatorFrame.origin.x += xDiff;
-
+    
     CGFloat selectedSegmentIndicatorCenterX;
-
+    
     if (CGRectContainsRect(CGRectInset(self.bounds, self.segmentIndicatorInset, 0), newSegmentIndicatorFrame)) {
         selectedSegmentIndicatorCenterX = self.selectedSegmentIndicator.center.x + xDiff;
     } else {
@@ -330,9 +330,9 @@
             selectedSegmentIndicatorCenterX = CGRectGetMaxX(self.bounds) - CGRectGetMidX(self.selectedSegmentIndicator.bounds) - self.segmentIndicatorInset;
         }
     }
-
+    
     self.selectedSegmentIndicator.center = CGPointMake(selectedSegmentIndicatorCenterX, self.selectedSegmentIndicator.center.y);
-
+    
     [panGestureRecognizer setTranslation:CGPointMake(0, 0) inView:panGestureRecognizer.view.superview];
     
     if (panGestureRecognizer.state == UIGestureRecognizerStateEnded) {
@@ -341,7 +341,7 @@
                 [self moveSelectedSegmentIndicatorToSegmentAtIndex:index animated:YES];
                 
                 if (index != self.selectedSegmentIndex) {
-                    _selectedSegmentIndex = index;
+                    self.selectedSegmentIndex = index;
                     [self sendActionsForControlEvents:UIControlEventValueChanged];
                 }
             }
@@ -368,7 +368,7 @@
                                            CGRectGetMinY(segment.frame) + self.segmentIndicatorInset,
                                            CGRectGetWidth(segment.frame) - (2.0f * self.segmentIndicatorInset),
                                            CGRectGetHeight(segment.frame) - (2.0f * self.segmentIndicatorInset));
-
+    
     return CGRectIntegral(indicatorFrameRect);
 }
 
@@ -504,13 +504,17 @@
     if (selectedSegmentIndex >= self.numberOfSegments) {
         selectedSegmentIndex = self.numberOfSegments - 1;
     }
-
+    
     [self moveSelectedSegmentIndicatorToSegmentAtIndex:selectedSegmentIndex animated:NO];
-
+    
     self.segments[_selectedSegmentIndex].selected = NO;
     self.segments[selectedSegmentIndex].selected = YES;
-
+    
     _selectedSegmentIndex = selectedSegmentIndex;
+    
+    if(self.delegate){
+        [self.delegate segmentedControl:self didSelectSegmentAtIndex:_selectedSegmentIndex];
+    }
 }
 
 - (void)setSelectedSegmentIndex:(NSUInteger)selectedSegmentIndex animated:(BOOL)animated {
@@ -519,11 +523,12 @@
     }
     
     [self moveSelectedSegmentIndicatorToSegmentAtIndex:selectedSegmentIndex animated:animated];
-
-    self.segments[_selectedSegmentIndex].selected = NO;
-    self.segments[selectedSegmentIndex].selected = YES;
-
-    _selectedSegmentIndex = selectedSegmentIndex;
+    
+    //    self.segments[_selectedSegmentIndex].selected = NO;
+    //    self.segments[selectedSegmentIndex].selected = YES;
+    
+    self.selectedSegmentIndex = selectedSegmentIndex;
 }
 
 @end
+
